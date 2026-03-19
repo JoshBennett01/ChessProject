@@ -1,4 +1,6 @@
--Add multiplayer with link
+-Check checkmate without queen/rook/bishop
+-validation
+-Check security
 
 Future:
 -Add my own ai chess player

@@ -646,7 +646,7 @@ public class GameMaster {
         for (int i = 0; i < chessBoard.length; i++) {
             for (int j = 0; j < chessBoard[i].length; j++) {
                 ChessPiece piece = chessBoard[i][j];
-                if (piece != null && piece.getTeam()) {
+                if (piece != null && piece.getTeam() == isWhite) {
                     Coord piecePos = new Coord(i, j);
                     if (piece instanceof King) {
                         teamPos.add(piecePos);

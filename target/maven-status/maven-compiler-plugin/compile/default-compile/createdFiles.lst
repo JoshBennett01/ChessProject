@@ -12,7 +12,6 @@ dev/JoshBennett/chess/pieces/Queen.class
 dev/JoshBennett/chess/pieces/Queen$1.class
 dev/JoshBennett/chess/logic/PlayerTurn.class
 dev/JoshBennett/chess/pieces/ChessPiece.class
-dev/JoshBennett/chess/service/GameService$MoveResult.class
 dev/JoshBennett/chess/service/GameService.class
 dev/JoshBennett/chess/pieces/King.class
 dev/JoshBennett/chess/logic/Coord.class
