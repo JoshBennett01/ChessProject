@@ -1,21 +1,11 @@
--Add solo vs Ai without backend
 -Reread everything
 
 Future:
 -Add my own ai chess player
--Add ads on sides?
+-Add ads on sides if launching?
 -Add timer
 -Add move history
+-Websocket
 
 Done:
--Frontend is done
-
-rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1
-
-1. Board placement     (ranks separated by `/`)
-2. Active color        (w or b)
-3. Castling rights     (- or KQkq subset)
-4. En passant target   (- or square like e3)
-5. Halfmove clock      (integer ≥0)
-Tracks 50 move stalemate
-6. Fullmove number     (integer ≥1)
+-Frontend
