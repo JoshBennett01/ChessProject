@@ -33,15 +33,16 @@ export default function RoomGame() {
 	const [fen, setFen] = useState(startFen);
 	const [tokenId, setTokenId] = useState();
 	const [status, setStatus] = useState("Waiting for opponent...");
+
 	const [playerColor, setPlayerColor] = useState(null);
 	const [isPlayerTeam, setPlayerTeam] = useState(null);
 	const [isWhiteTurn, setWhiteTurn] = useState(true);
+
 	const [boardOrientation, setBoardOrientation] = useState("white");
 	const [gameOver, setGameOver] = useState(false);
 	const [shareUrl, setShareUrl] = useState("");
 	const [copied, setCopied] = useState(false);
 	const [roomFull, setRoomFull] = useState(false);
-	const [gameStart, setGameStart] = useState(false);
 
 	const [promotionOpen, setPromotionOpen] = useState(false);
 	const [promotionColor, setPromotionColor] = useState("white");
@@ -64,6 +65,11 @@ export default function RoomGame() {
 				const fullUrl = window.location.origin + `/game/${roomId}`;
 				setShareUrl(fullUrl);
 
+				if (!res.data) {
+					setRoomFull(true);
+					return;
+				}
+
 				if (data.whitePlayerId === playerId) {
 					setPlayerColor("white");
 					setPlayerTeam(true);
@@ -81,47 +87,30 @@ export default function RoomGame() {
 						setTokenId(storedToken);
 					}
 				} else if (!data.whitePlayerId) {
-					const storedToken = getStoredTokenId(roomId);
-					if (storedToken) {
-						setTokenId(storedToken);
-						setPlayerColor("white");
-						setPlayerTeam(true);
-						setBoardOrientation("white");
-					} else {
-						const joinRes = await axios.post(
-							`${API_URL}/rooms/${roomId}/join?playerId=${playerId}&color=white`,
-						);
-						const joinData = joinRes.data;
-						setTokenId(joinData.tokenId);
-						setStoredTokenId(roomId, joinData.tokenId);
+					const joinRes = await axios.post(
+						`${API_URL}/rooms/${roomId}/join?playerId=${playerId}&color=white`,
+					);
+					const joinData = joinRes.data;
+					setTokenId(joinData.tokenId);
+					setStoredTokenId(roomId, joinData.tokenId);
 
-						setPlayerColor("white");
-						setPlayerTeam(true);
-						setBoardOrientation("white");
-					}
+					setPlayerColor("white");
+					setPlayerTeam(true);
+					setBoardOrientation("white");
 				} else if (!data.blackPlayerId) {
-					const storedToken = getStoredTokenId(roomId);
-					if (storedToken) {
-						setTokenId(storedToken);
-						setPlayerColor("black");
-						setPlayerTeam(false);
-						setBoardOrientation("black");
-					} else {
-						const joinRes = await axios.post(
-							`${API_URL}/rooms/${roomId}/join?playerId=${playerId}&color=black`,
-						);
-						const joinData = joinRes.data;
-						setTokenId(joinData.tokenId);
-						setStoredTokenId(roomId, joinData.tokenId);
+					const joinRes = await axios.post(
+						`${API_URL}/rooms/${roomId}/join?playerId=${playerId}&color=black`,
+					);
+					const joinData = joinRes.data;
+					setTokenId(joinData.tokenId);
+					setStoredTokenId(roomId, joinData.tokenId);
 
-						setPlayerColor("black");
-						setPlayerTeam(false);
-						setBoardOrientation("black");
-					}
+					setPlayerColor("black");
+					setPlayerTeam(false);
+					setBoardOrientation("black");
 				} else {
 					// Room full
 					setRoomFull(true);
-					setStatus("Room is full. Spectating...");
 				}
 			} catch (err) {
 				setStatus("Failed to load game");
@@ -197,10 +186,8 @@ export default function RoomGame() {
 			}
 
 			if (data.success && data.fen) {
-				setGameStart(true);
 				setFen(data.fen);
 				setStatus("Opponent's turn...");
-				console.log(data.message);
 				return true;
 			}
 
@@ -258,7 +245,7 @@ export default function RoomGame() {
 					setStatus("Game has been reset");
 				}
 			} else {
-				setStatus("Game cannot be reset");
+				setStatus("Game is not over!");
 			}
 		} catch (err) {
 			console.error("Reset error:", err);

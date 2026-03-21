@@ -1,10 +1,14 @@
--Check checkmate without queen/rook/bishop
--validation
--Check security
+-Add solo vs Ai without backend
+-Reread everything
 
 Future:
 -Add my own ai chess player
 -Add ads on sides?
+-Add timer
+-Add move history
+
+Done:
+-Frontend is done
 
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1
 

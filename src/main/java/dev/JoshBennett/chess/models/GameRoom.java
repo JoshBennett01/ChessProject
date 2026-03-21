@@ -63,10 +63,16 @@ public class GameRoom {
 
     public void setWhitePlayerId(String whitePlayerId) {
         this.whitePlayerId = whitePlayerId;
+        if (blackPlayerId != null) {
+            message = "Game Loaded";
+        }
     }
 
     public void setBlackPlayerId(String blackPlayerId) {
         this.blackPlayerId = blackPlayerId;
+        if (whitePlayerId != null) {
+            message = "Game Loaded";
+        }
     }
 
     public RoomInfo getRoomInfo() {

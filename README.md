@@ -314,7 +314,6 @@ The application implements standard online chess rules including(chess.com):
 
 - No move history panel
 - No game clock/timer
-- No user accounts (player identity based on localStorage)
 - Rooms are stored in memory and reset on server restart
 - No mobile-optimized UI
 
