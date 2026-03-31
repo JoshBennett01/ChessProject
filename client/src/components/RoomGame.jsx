@@ -106,6 +106,7 @@ export default function RoomGame() {
 					setStoredTokenId(roomId, joinData.tokenId);
 
 					setPlayerTeam(true);
+					setStoredTeam(roomId, true);
 
 					setPlayerColor("white");
 					setBoardOrientation("white");
@@ -143,7 +144,7 @@ export default function RoomGame() {
 			setStatus(event.message);
 			return;
 		}
-		if (event.isWhiteTurn === (getStoredTeam(roomId) == "true")) {
+		if (event.isWhiteTurn === (getStoredTeam(roomId) === "true")) {
 			setStatus(event.message);
 		} else {
 			setStatus("Opponent's turn...");

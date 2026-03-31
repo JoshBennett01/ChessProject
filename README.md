@@ -41,6 +41,16 @@ A real-time multiplayer chess application built with Spring Boot and React.
 
 ## Setup
 
+### Cloning
+
+```bash
+# Navigate to you're desired location
+cd ~/Downloads/test
+
+# Clone repo
+git clone https://github.com/JoshBennett01/ChessProject.git
+```
+
 ### Unit Test
 
 ```bash
@@ -66,11 +76,14 @@ The backend server starts at `http://localhost:8080`.
 ### Frontend
 
 ```bash
-# Navigate to client directory
+# Open seperate terminal and navigate to client directory
 cd client
 
 # Install dependencies
 npm install
+
+# Fix npm module corruptions if any
+npm audit fix
 
 # Run development server
 npm run dev
@@ -82,7 +95,7 @@ The frontend dev server starts at `http://localhost:5173`.
 
 1. Open the frontend in your browser
 2. Click "Create Game" to generate a room
-3. Share the room link with your opponent or
+3. Share the room link with your opponent if deployed or
    a new private window of you're browser
 4. Second player joins via the shared link
 5. White plays first; make moves by dragging pieces
@@ -250,11 +263,11 @@ All endpoints validate input and return `400 Bad Request` with an error response
 
 ### Error Codes
 
-| Code               | Description                                    |
-| ------------------ | ---------------------------------------------- |
-| `VALIDATION_ERROR` | Request body or parameters failed validation   |
-| `INVALID_ARGUMENT` | Request contains invalid game logic arguments  |
-| `INTERNAL_ERROR`   | Unexpected server error (includes error message)|
+| Code               | Description                                      |
+| ------------------ | ------------------------------------------------ |
+| `VALIDATION_ERROR` | Request body or parameters failed validation     |
+| `INVALID_ARGUMENT` | Request contains invalid game logic arguments    |
+| `INTERNAL_ERROR`   | Unexpected server error (includes error message) |
 
 ## Project Structure
 
