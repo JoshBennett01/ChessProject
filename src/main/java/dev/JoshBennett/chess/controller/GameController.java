@@ -1,6 +1,7 @@
 package dev.JoshBennett.chess.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.JoshBennett.chess.dto.GameEvent;
 import dev.JoshBennett.chess.models.GameRoom;
 import dev.JoshBennett.chess.service.GameService;
 import dev.JoshBennett.chess.service.RoomInfo;
@@ -27,9 +29,11 @@ import jakarta.validation.constraints.Size;
 public class GameController {
 
     private final GameService gameService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public GameController(GameService gameService) {
+    public GameController(GameService gameService, SimpMessagingTemplate messagingTemplate) {
         this.gameService = gameService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/rooms")
@@ -57,6 +61,12 @@ public class GameController {
         if (info == null) {
             return ResponseEntity.notFound().build();
         }
+
+        if (info.isFull) {
+            messagingTemplate.convertAndSend("/topic/room/" + roomId,
+                    new GameEvent.JoinedRoom());
+        }
+
         return ResponseEntity.ok(info);
     }
 
@@ -73,6 +83,13 @@ public class GameController {
                 request.toRow(),
                 request.toCol()
         );
+
+        if (result.isSuccess()) {
+            GameRoom room = gameService.getRoom(roomId);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId,
+                    new GameEvent.MoveMade(result.getFen(), result.getMessage().contains("Checkmate"), room.isWhiteTurn(), result.getMessage()));
+        }
+
         return ResponseEntity.ok(result);
     }
 
@@ -82,16 +99,14 @@ public class GameController {
             @Valid @RequestBody PromoteRequest request) {
 
         GameRoom.MoveResult result = gameService.promoteRoomPawn(roomId, request.tokenId(), request.pieceType());
-        return ResponseEntity.ok(result);
-    }
 
-    @GetMapping("/rooms/{roomId}/poll")
-    public ResponseEntity<RoomInfo> pollRoom(@PathVariable String roomId) {
-        RoomInfo info = gameService.getRoomInfo(roomId);
-        if (info == null) {
-            return ResponseEntity.notFound().build();
+        if (result.isSuccess()) {
+            GameRoom room = gameService.getRoom(roomId);
+            messagingTemplate.convertAndSend("/topic/room/" + roomId,
+                    new GameEvent.MoveMade(result.getFen(), result.getMessage().contains("Checkmate"), room.isWhiteTurn(), result.getMessage()));
         }
-        return ResponseEntity.ok(info);
+
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/rooms/{roomId}/reset")
@@ -100,6 +115,8 @@ public class GameController {
         if (info == null) {
             return ResponseEntity.notFound().build();
         }
+        messagingTemplate.convertAndSend("/topic/room/" + roomId,
+                new GameEvent.GameReset(info.fen(), info.isWhiteTurn()));
         return ResponseEntity.ok(info);
     }
 
@@ -133,7 +150,7 @@ public class GameController {
 
     }
 
-    public record JoinResponse(String tokenId) {
+    public record JoinResponse(String tokenId, boolean isFull) {
 
     }
 

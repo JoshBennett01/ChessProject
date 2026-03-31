@@ -242,7 +242,7 @@ class GameServiceTest {
                     roomId, joinResponse.tokenId(), 1, 4, 3, 4
             );
 
-            assertTrue(result.success());
+            assertTrue(result.isSuccess());
         }
 
         @Test
@@ -255,8 +255,8 @@ class GameServiceTest {
                     roomId, "invalid-token", 6, 4, 5, 4
             );
 
-            assertFalse(result.success());
-            assertEquals("Invalid token", result.message());
+            assertFalse(result.isSuccess());
+            assertEquals("Invalid token", result.getMessage());
         }
     }
 
@@ -277,8 +277,8 @@ class GameServiceTest {
                     roomId, joinResponse.tokenId(), 1, 4, 3, 4
             );
 
-            assertTrue(result.success());
-            assertNotNull(result.fen());
+            assertTrue(result.isSuccess());
+            assertNotNull(result.getFen());
         }
 
         @Test
@@ -292,7 +292,7 @@ class GameServiceTest {
                     roomId, joinResponse.tokenId(), 1, 4, 4, 4
             );
 
-            assertFalse(result.success());
+            assertFalse(result.isSuccess());
         }
 
         @Test
@@ -322,7 +322,7 @@ class GameServiceTest {
                     roomId, blackJoin.tokenId(), 6, 4, 4, 4
             );
 
-            assertTrue(blackMove.success());
+            assertTrue(blackMove.isSuccess());
         }
 
         @Test
@@ -338,7 +338,7 @@ class GameServiceTest {
                     roomId, whiteJoin.tokenId(), 6, 4, 5, 4
             );
 
-            assertFalse(blackMove.success());
+            assertFalse(blackMove.isSuccess());
         }
     }
 
@@ -401,7 +401,7 @@ class GameServiceTest {
             }
 
             GameRoom.MoveResult result = gameService.promoteRoomPawn(roomId, whiteJoin.tokenId(), "X");
-            assertFalse(result.success());
+            assertFalse(result.isSuccess());
         }
 
         @Test
@@ -411,7 +411,7 @@ class GameServiceTest {
             gameService.joinRoom(roomId, UUID.randomUUID().toString(), "white");
 
             GameRoom.MoveResult result = gameService.promoteRoomPawn(roomId, "invalid-token", "Q");
-            assertFalse(result.success());
+            assertFalse(result.isSuccess());
         }
     }
 

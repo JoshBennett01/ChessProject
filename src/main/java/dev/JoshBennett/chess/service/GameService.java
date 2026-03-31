@@ -45,6 +45,7 @@ public class GameService {
     }
 
     public JoinResponse joinRoom(String roomId, String playerId, String color) {
+        boolean isFull = false;
         GameRoom room = rooms.get(roomId);
         if (room == null) {
             return null;
@@ -52,12 +53,19 @@ public class GameService {
         if (room.getWhitePlayerId() != null && room.getBlackPlayerId() != null) {
             return null;
         }
+
         if ("white".equalsIgnoreCase(color) && room.getWhitePlayerId() == null) {
             room.setWhitePlayerId(playerId);
-            return new JoinResponse(room.getWhiteTokenId());
+            if (room.getBlackPlayerId() != null) {
+                isFull = true;
+            }
+            return new JoinResponse(room.getWhiteTokenId(), isFull);
         } else if ("black".equalsIgnoreCase(color) && room.getBlackPlayerId() == null) {
             room.setBlackPlayerId(playerId);
-            return new JoinResponse(room.getBlackTokenId());
+            if (room.getWhitePlayerId() != null) {
+                isFull = true;
+            }
+            return new JoinResponse(room.getBlackTokenId(), isFull);
         }
         return null;
     }
@@ -93,5 +101,9 @@ public class GameService {
             return new GameRoom.MoveResult(false, "Room not found", "", 0);
         }
         return room.promotePawn(tokenId, pieceType);
+    }
+
+    public GameRoom getRoom(String roomId) {
+        return rooms.get(roomId);
     }
 }

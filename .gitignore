@@ -1,1 +1,6 @@
 client/public/*.wasm
+target/
+node_modules/
+.idea/
+*.class
+*.log

@@ -232,13 +232,17 @@ public class GameRoom {
             whitePlayerId = null;
             blackPlayerId = null;
 
-            this.message = "Loading...";
+            this.message = "Loaded";
             gameMaster.loadGame();
         }
     }
 
     public String getFen() {
         return gameMaster.getFen();
+    }
+
+    public boolean isWhiteTurn() {
+        return isWhiteTurn;
     }
 
     public String checkFen() {
@@ -253,16 +257,44 @@ public class GameRoom {
         return gameMaster.getFen() + "|" + (isWhiteTurn ? "w" : "b") + "|" + moveCount;
     }
 
-    public record MoveResult(
-            boolean success,
-            String message,
-            String fen,
-            int moveCount,
-            String promotionSquare
-            ) {
+    public static class MoveResult {
+
+        private final boolean success;
+        private final String message;
+        private final String fen;
+        private final int moveCount;
+        private final String promotionSquare;
+
+        public MoveResult(boolean success, String message, String fen, int moveCount, String promotionSquare) {
+            this.success = success;
+            this.message = message;
+            this.fen = fen;
+            this.moveCount = moveCount;
+            this.promotionSquare = promotionSquare;
+        }
 
         public MoveResult(boolean success, String message, String fen, int moveCount) {
             this(success, message, fen, moveCount, null);
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getFen() {
+            return fen;
+        }
+
+        public int getMoveCount() {
+            return moveCount;
+        }
+
+        public String getPromotionSquare() {
+            return promotionSquare;
         }
     }
 }

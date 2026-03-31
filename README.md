@@ -4,10 +4,12 @@ A real-time multiplayer chess application built with Spring Boot and React.
 
 ## Features
 
-- Real-time multiplayer chess via room-based matchmaking
+- Real-time multiplayer chess via room-based matchmaking using WebSockets
 - Full chess rule enforcement (all piece movements, special moves)
 - Check, checkmate, and stalemate detection
 - Draw detection (threefold repetition, 50-move rule, insufficient material)
+- Castling (kingside and queenside)
+- En passant captures
 - Pawn promotion
 - Spectator mode for full rooms
 - Persistent player identification via localStorage
@@ -21,15 +23,15 @@ A real-time multiplayer chess application built with Spring Boot and React.
 │   Port 5173    │     │   Port 8080     │
 └─────────────────┘     └─────────────────┘
         │                       │
-        │   WebSocket/Polling    │
+        │      WebSocket/STOMP  │
         └───────────────────────┘
 ```
 
 ### Tech Stack
 
-- **Frontend:** React 18, Vite, react-chessboard, axios
+- **Frontend:** React 19, Vite, react-chessboard, axios
 - **Backend:** Spring Boot 3.2, Java 17
-- **Real-time:** Polling (1-second interval)
+- **Real-time:** WebSocket (STOMP protocol)
 
 ## Prerequisites
 
@@ -248,11 +250,11 @@ All endpoints validate input and return `400 Bad Request` with an error response
 
 ### Error Codes
 
-| Code               | Description                                   |
-| ------------------ | --------------------------------------------- |
-| `VALIDATION_ERROR` | Request body or parameters failed validation  |
-| `INVALID_ARGUMENT` | Request contains invalid game logic arguments |
-| `INTERNAL_ERROR`   | Unexpected server error                       |
+| Code               | Description                                    |
+| ------------------ | ---------------------------------------------- |
+| `VALIDATION_ERROR` | Request body or parameters failed validation   |
+| `INVALID_ARGUMENT` | Request contains invalid game logic arguments  |
+| `INTERNAL_ERROR`   | Unexpected server error (includes error message)|
 
 ## Project Structure
 
@@ -262,7 +264,7 @@ ChessApp/
 │   ├── ChessApplication.java          # Spring Boot entry point
 │   ├── controller/
 │   │   ├── GameController.java        # REST API endpoints
-│   │   └── GlobalExceptionHandler.java # Input validation error handling
+│   │   └── GlobalExceptionHandler.java # Error handling with logging
 │   ├── logic/
 │   │   ├── GameMaster.java           # Core chess game logic
 │   │   ├── Coord.java                # Board coordinate representation
@@ -283,6 +285,9 @@ ChessApp/
 │   │   │   ├── RoomGame.jsx          # Multiplayer game board
 │   │   │   ├── ChessGame.jsx         # Single-player game
 │   │   │   └── PromotionModal.jsx    # Pawn promotion UI
+│   │   ├── hooks/
+│   │   │   ├── useGameWebSocket.js   # WebSocket connection for multiplayer
+│   │   │   └── useStockfish.ts       # AI opponent integration
 │   │   ├── App.jsx                  # Main application
 │   │   └── main.jsx                 # React entry point
 │   └── package.json
@@ -319,7 +324,6 @@ The application implements standard online chess rules including(chess.com):
 
 ## Future Improvements
 
-- WebSocket-based real-time updates (replace polling)
 - Move history and game notation
 - Game clock with configurable time controls
 - User authentication system

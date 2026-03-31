@@ -1,11 +1,5 @@
--Reread everything
-
 Future:
 -Add my own ai chess player
 -Add ads on sides if launching?
 -Add timer
 -Add move history
--Websocket
-
-Done:
--Frontend

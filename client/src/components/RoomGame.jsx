@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import PromotionModal from "./PromotionModal";
+import { useGameWebSocket } from "../hooks/useGameWebSocket";
 import axios from "axios";
 
 const API_URL = "/api/game";
-const POLL_INTERVAL = 1000;
 const startFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 function generatePlayerId() {
@@ -25,6 +25,14 @@ function setStoredTokenId(roomId, tokenId) {
 	localStorage.setItem(`chess-token-${roomId}`, tokenId);
 }
 
+function getStoredTeam(roomId) {
+	return localStorage.getItem(`chess-team-${roomId}`);
+}
+
+function setStoredTeam(roomId, isPlayerWhite) {
+	localStorage.setItem(`chess-team-${roomId}`, isPlayerWhite);
+}
+
 export default function RoomGame() {
 	const { roomId } = useParams();
 	const navigate = useNavigate();
@@ -35,7 +43,7 @@ export default function RoomGame() {
 	const [status, setStatus] = useState("Waiting for opponent...");
 
 	const [playerColor, setPlayerColor] = useState(null);
-	const [isPlayerTeam, setPlayerTeam] = useState(null);
+	const [isPlayerWhite, setPlayerTeam] = useState(null);
 	const [isWhiteTurn, setWhiteTurn] = useState(true);
 
 	const [boardOrientation, setBoardOrientation] = useState("white");
@@ -71,16 +79,19 @@ export default function RoomGame() {
 				}
 
 				if (data.whitePlayerId === playerId) {
-					setPlayerColor("white");
 					setPlayerTeam(true);
+					setStoredTeam(roomId, true);
+
+					setPlayerColor("white");
 					setBoardOrientation("white");
 					const storedToken = getStoredTokenId(roomId);
 					if (storedToken) {
 						setTokenId(storedToken);
 					}
 				} else if (data.blackPlayerId === playerId) {
-					setPlayerColor("black");
 					setPlayerTeam(false);
+
+					setPlayerColor("black");
 					setBoardOrientation("black");
 					const storedToken = getStoredTokenId(roomId);
 					if (storedToken) {
@@ -94,8 +105,9 @@ export default function RoomGame() {
 					setTokenId(joinData.tokenId);
 					setStoredTokenId(roomId, joinData.tokenId);
 
-					setPlayerColor("white");
 					setPlayerTeam(true);
+
+					setPlayerColor("white");
 					setBoardOrientation("white");
 				} else if (!data.blackPlayerId) {
 					const joinRes = await axios.post(
@@ -105,11 +117,12 @@ export default function RoomGame() {
 					setTokenId(joinData.tokenId);
 					setStoredTokenId(roomId, joinData.tokenId);
 
-					setPlayerColor("black");
 					setPlayerTeam(false);
+					setStoredTeam(roomId, false);
+
+					setPlayerColor("black");
 					setBoardOrientation("black");
 				} else {
-					// Room full
 					setRoomFull(true);
 				}
 			} catch (err) {
@@ -119,35 +132,43 @@ export default function RoomGame() {
 		initGame();
 	}, []);
 
-	useEffect(() => {
-		if (!roomId || roomFull) return;
+	const handleWebSocketMove = useCallback((event) => {
+		setWhiteTurn(event.isWhiteTurn);
 
-		const poll = async () => {
-			try {
-				const res = await axios.get(`${API_URL}/rooms/${roomId}`);
-				const data = res.data;
+		if (event.fen) {
+			setFen(event.fen);
+		}
+		if (event.isCheckmate) {
+			setGameOver(true);
+			setStatus(event.message);
+			return;
+		}
+		if (event.isWhiteTurn === (getStoredTeam(roomId) == "true")) {
+			setStatus(event.message);
+		} else {
+			setStatus("Opponent's turn...");
+		}
+	}, []);
 
-				setFen(data.fen);
-				setGameOver(data.gameOver);
-				setWhiteTurn(data.isWhiteTurn);
-				if (data.gameOver) {
-					setStatus(data.message);
-				}
-				if (data.isWhiteTurn === isPlayerTeam) {
-					setStatus(data.message);
-				}
-			} catch (err) {
-				console.error("Poll error:", err);
-			}
-		};
+	const handleWebSocketReset = useCallback((event) => {
+		setFen(event.fen);
+		setWhiteTurn(event.isWhiteTurn);
+		setGameOver(false);
+		setStatus("Game has been reset");
+	}, []);
 
-		poll();
-		const interval = setInterval(poll, POLL_INTERVAL);
-		return () => clearInterval(interval);
-	}, [roomId, roomFull, gameOver, isPlayerTeam]);
+	const handleWebSocketRoomFull = useCallback(() => {
+		setStatus("Loaded...");
+	}, []);
+
+	const {} = useGameWebSocket(roomId, {
+		onMoveMade: handleWebSocketMove,
+		onGameReset: handleWebSocketReset,
+		onRoomFull: handleWebSocketRoomFull,
+	});
 
 	const onPieceDrop = async (info) => {
-		if (isPlayerTeam !== isWhiteTurn || gameOver) {
+		if (isPlayerWhite !== isWhiteTurn || gameOver) {
 			return false;
 		}
 
@@ -187,7 +208,6 @@ export default function RoomGame() {
 
 			if (data.success && data.fen) {
 				setFen(data.fen);
-				setStatus("Opponent's turn...");
 				return true;
 			}
 
@@ -213,7 +233,6 @@ export default function RoomGame() {
 			const data = res.data;
 			if (data.success && data.fen) {
 				setFen(data.fen);
-				setStatus("Opponent's turn...");
 			} else {
 				setStatus(data.message || "Promotion failed");
 			}
@@ -349,7 +368,7 @@ export default function RoomGame() {
 						onPieceDrop: onPieceDrop,
 						animationDuration: 200,
 						boardOrientation: boardOrientation,
-						arePiecesDraggable: isPlayerTeam && !gameOver,
+						arePiecesDraggable: isPlayerWhite && !gameOver,
 						customBoardStyle: {
 							borderRadius: "4px",
 							boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
