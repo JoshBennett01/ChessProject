@@ -344,3 +344,5 @@ The application implements standard online chess rules including(chess.com):
 - Mobile-responsive design
 - Spectator chat
 - Rematch functionality
+
+- Many back-end optimizations to do, namely using different algorithm for moves.
